@@ -1,0 +1,377 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Track Your Furniture Order</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .tracker-card {
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            margin-top: 50px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.2);
+        }
+
+        .tracker-card h1 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 10px;
+        }
+
+        .tracker-card .subtitle {
+            text-align: center;
+            color: #666;
+            margin-bottom: 30px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            color: #555;
+            font-weight: 500;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            font-size: 1rem;
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: bold;
+            width: 100%;
+            transition: all 0.3s;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(102,126,234,0.4);
+        }
+
+        .result-card {
+            margin-top: 30px;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 15px;
+            display: none;
+        }
+
+        .result-card.show {
+            display: block;
+            animation: fadeIn 0.5s ease;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .furniture-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #e0e0e0;
+        }
+
+        .furniture-id {
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: #667eea;
+        }
+
+        .status {
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-weight: bold;
+        }
+
+        .status-Pending { background: #ffc107; color: #333; }
+        .status-In-Progress { background: #17a2b8; color: white; }
+        .status-Completed { background: #28a745; color: white; }
+
+        .progress-bar {
+            background: #e0e0e0;
+            border-radius: 10px;
+            height: 20px;
+            margin: 20px 0;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+            height: 100%;
+            border-radius: 10px;
+            transition: width 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 0.8rem;
+            font-weight: bold;
+        }
+
+        .detail-row {
+            margin: 15px 0;
+            padding: 10px;
+            background: white;
+            border-radius: 10px;
+        }
+
+        .detail-label {
+            font-weight: bold;
+            color: #555;
+            margin-bottom: 5px;
+        }
+
+        .progress-entry {
+            background: white;
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 10px;
+            border-left: 4px solid #667eea;
+        }
+
+        .progress-date {
+            color: #667eea;
+            font-weight: bold;
+            font-size: 0.85rem;
+        }
+
+        .error-message {
+            background: #f8d7da;
+            color: #721c24;
+            padding: 15px;
+            border-radius: 10px;
+            margin-top: 20px;
+            text-align: center;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 20px;
+            display: none;
+        }
+
+        .loading.show {
+            display: block;
+        }
+
+        .spinner {
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #667eea;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .back-link {
+            display: inline-block;
+            margin-top: 20px;
+            color: #667eea;
+            text-decoration: none;
+            text-align: center;
+            width: 100%;
+        }
+
+        .back-link:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="tracker-card">
+            <h1>📦 Track Your Furniture Order</h1>
+            <div class="subtitle">Enter your tracking code to see real-time progress</div>
+            
+            <div class="form-group">
+                <label>Tracking Code</label>
+                <input type="text" id="trackingCode" placeholder="Enter code (e.g., EN84FMZ2)">
+            </div>
+            <button class="btn" onclick="trackOrder()">Track Order</button>
+
+            <div class="loading" id="loading">
+                <div class="spinner"></div>
+                <p style="margin-top: 10px;">Fetching your order details...</p>
+            </div>
+
+            <div id="result" class="result-card"></div>
+            
+            <a href="index.html" class="back-link">← Back to Main Page</a>
+        </div>
+    </div>
+
+    <script>
+        // This function retrieves data from localStorage
+        // In a real deployment, this would call an API
+        function trackOrder() {
+            const code = document.getElementById('trackingCode').value.trim().toUpperCase();
+            const resultDiv = document.getElementById('result');
+            const loadingDiv = document.getElementById('loading');
+            
+            if (!code) {
+                showError('Please enter a tracking code');
+                return;
+            }
+            
+            // Show loading
+            loadingDiv.classList.add('show');
+            resultDiv.classList.remove('show');
+            
+            // Simulate API call delay
+            setTimeout(() => {
+                try {
+                    // Get data from localStorage (same storage as main app)
+                    const viewLinks = JSON.parse(localStorage.getItem('viewLinks') || '{}');
+                    const furnitureList = JSON.parse(localStorage.getItem('furnitureList') || '[]');
+                    const progressList = JSON.parse(localStorage.getItem('progressList') || '[]');
+                    
+                    const furnitureId = viewLinks[code];
+                    
+                    if (!furnitureId) {
+                        showError('Invalid tracking code. Please check and try again.');
+                        loadingDiv.classList.remove('show');
+                        return;
+                    }
+                    
+                    const furniture = furnitureList.find(f => f.id === furnitureId);
+                    
+                    if (!furniture) {
+                        showError('Furniture not found for this tracking code.');
+                        loadingDiv.classList.remove('show');
+                        return;
+                    }
+                    
+                    const progress = progressList.filter(p => p.furnitureId === furnitureId);
+                    displayResult(furniture, progress, code);
+                    
+                } catch (error) {
+                    showError('Error loading data. Please try again.');
+                } finally {
+                    loadingDiv.classList.remove('show');
+                }
+            }, 500);
+        }
+        
+        function displayResult(furniture, progress, code) {
+            const resultDiv = document.getElementById('result');
+            
+            let progressHtml = '';
+            if (progress.length === 0) {
+                progressHtml = '<p style="text-align: center; color: #666;">No progress updates yet.</p>';
+            } else {
+                progressHtml = '<h3 style="margin-top: 20px;">📋 Progress Updates</h3>';
+                progress.forEach(p => {
+                    progressHtml += `
+                        <div class="progress-entry">
+                            <div class="progress-date">📅 ${p.date}</div>
+                            <div style="margin: 10px 0;"><strong>Progress:</strong> ${p.progressPercent}%</div>
+                            <div><strong>Description:</strong> ${p.description}</div>
+                            ${p.imagePath ? `<div style="margin-top: 5px;"><strong>Image:</strong> ${p.imagePath}</div>` : ''}
+                        </div>
+                    `;
+                });
+            }
+            
+            resultDiv.innerHTML = `
+                <div class="furniture-header">
+                    <span class="furniture-id">Order #: ${furniture.id}</span>
+                    <span class="status status-${furniture.status.replace(' ', '-')}">${furniture.status}</span>
+                </div>
+                <h2 style="margin-bottom: 10px;">${furniture.name}</h2>
+                <div class="detail-row">
+                    <div class="detail-label">Customer Name</div>
+                    <div>${furniture.customerName}</div>
+                </div>
+                <div class="detail-row">
+                    <div class="detail-label">Material/Type</div>
+                    <div>${furniture.type}</div>
+                </div>
+                <div class="detail-row">
+                    <div class="detail-label">Assigned Craftsman</div>
+                    <div>${furniture.assignedCraftsman}</div>
+                </div>
+                <div class="detail-row">
+                    <div class="detail-label">Overall Progress</div>
+                    <div class="progress-bar">
+                        <div class="progress-fill" style="width: ${furniture.progress}%">${furniture.progress}%</div>
+                    </div>
+                </div>
+                ${progressHtml}
+                <div style="margin-top: 20px; padding: 10px; background: #e7f3ff; border-radius: 10px; text-align: center; font-size: 0.85rem;">
+                    🔒 Tracking Code: ${code}<br>
+                    Share this code with friends or family to track this order
+                </div>
+            `;
+            
+            resultDiv.classList.add('show');
+        }
+        
+        function showError(message) {
+            const resultDiv = document.getElementById('result');
+            resultDiv.innerHTML = `<div class="error-message">❌ ${message}</div>`;
+            resultDiv.classList.add('show');
+        }
+        
+        // Check URL for code parameter
+        const urlParams = new URLSearchParams(window.location.search);
+        const codeParam = urlParams.get('code');
+        if (codeParam) {
+            document.getElementById('trackingCode').value = codeParam;
+            trackOrder();
+        }
+    </script>
+</body>
+</html>
